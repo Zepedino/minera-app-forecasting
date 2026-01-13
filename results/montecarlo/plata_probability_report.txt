@@ -1,0 +1,48 @@
+
+===========================================================================
+ANÁLISIS DE INCERTIDUMBRE MONTE CARLO - PLATA
+===========================================================================
+
+CONFIGURACIÓN:
+  - Simulaciones:            10,000
+  - Modelo base:             Holt
+  - MAPE baseline:           28.69%
+  - Volatilidad histórica:   7.97% mensual
+  - Horizonte pronóstico:    84 meses
+
+===========================================================================
+PRONÓSTICO MES 84 (ÚLTIMO MES):
+===========================================================================
+
+FORECAST DETERMINÍSTICO:
+  - Precio Forecast:         $18.55
+
+ANÁLISIS PROBABILÍSTICO (MONTE CARLO):
+  - Precio Esperado (Media): $18.69
+  - Mediana:                 $18.69
+  - Desviación Estándar:     $1.46
+  - Coef. Variación:         7.8%
+
+INTERVALOS DE CONFIANZA:
+  - P5  (Pesimista):         $16.29
+  - P10:                     $16.82
+  - P25:                     $17.70
+  - P50 (Mediana):           $18.69
+  - P75:                     $19.68
+  - P90:                     $20.59
+  - P95 (Optimista):         $21.09
+
+ANÁLISIS DE RIESGO:
+  - Rango IC 90%:            $4.80
+  - Rango IC 50% (IQR):      $1.98
+
+PROBABILIDADES DE ESCENARIOS:
+  - Prob(Precio > Forecast): 53.7%
+  - Prob(Precio < Forecast): 46.3%
+
+VALIDACIÓN CON DATOS REALES:
+  - Precio real (test):      $79.86
+  - Dentro de IC90%:         NO ❌
+  - Error vs Mediana MC:     $61.17
+
+===========================================================================

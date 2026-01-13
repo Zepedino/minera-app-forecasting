@@ -1,0 +1,48 @@
+
+===========================================================================
+ANÁLISIS DE INCERTIDUMBRE MONTE CARLO - COBALTO
+===========================================================================
+
+CONFIGURACIÓN:
+  - Simulaciones:            10,000
+  - Modelo base:             Damped Trend
+  - MAPE baseline:           25.65%
+  - Volatilidad histórica:   8.67% mensual
+  - Horizonte pronóstico:    60 meses
+
+===========================================================================
+PRONÓSTICO MES 60 (ÚLTIMO MES):
+===========================================================================
+
+FORECAST DETERMINÍSTICO:
+  - Precio Forecast:         $33393.60
+
+ANÁLISIS PROBABILÍSTICO (MONTE CARLO):
+  - Precio Esperado (Media): $33452.90
+  - Mediana:                 $33448.50
+  - Desviación Estándar:     $2861.49
+  - Coef. Variación:         8.6%
+
+INTERVALOS DE CONFIANZA:
+  - P5  (Pesimista):         $28766.40
+  - P10:                     $29760.20
+  - P25:                     $31510.49
+  - P50 (Mediana):           $33448.50
+  - P75:                     $35364.40
+  - P90:                     $37126.18
+  - P95 (Optimista):         $38148.92
+
+ANÁLISIS DE RIESGO:
+  - Rango IC 90%:            $9382.53
+  - Rango IC 50% (IQR):      $3853.91
+
+PROBABILIDADES DE ESCENARIOS:
+  - Prob(Precio > Forecast): 50.6%
+  - Prob(Precio < Forecast): 49.4%
+
+VALIDACIÓN CON DATOS REALES:
+  - Precio real (test):      $45386.47
+  - Dentro de IC90%:         NO ❌
+  - Error vs Mediana MC:     $11937.97
+
+===========================================================================
