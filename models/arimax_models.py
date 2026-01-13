@@ -107,13 +107,11 @@ class ARIMAXModels:
         else:
             forecast_exog = np.tile(exog[-1], (forecast_steps, 1))
         
-        # Generar forecast con intervalo de confianza
-        forecast_result = model.get_forecast(
-            steps=forecast_steps,
-            exogenous=forecast_exog
+        # Generar forecast - pmdarima usa .predict() no .get_forecast()
+        forecast_values = model.predict(
+            n_periods=forecast_steps,
+            X=forecast_exog
         )
-        
-        forecast_values = forecast_result.predicted_mean.values
         
         return pd.Series(forecast_values, index=None), model
     
@@ -181,7 +179,7 @@ class ARIMAXModels:
         else:
             forecast_exog = np.tile(exog[-1], (forecast_steps, 1))
         
-        # Forecast
+        # Forecast - statsmodels.ARIMA usa .get_forecast()
         forecast_result = model.get_forecast(
             steps=forecast_steps,
             exog=forecast_exog
@@ -246,18 +244,15 @@ class ARIMAXModels:
             suppress_warnings=True
         )
         
-        # Forecast en test
-        forecast = model.get_forecast(
-            steps=test_size,
-            exogenous=exog_test
-        ).predicted_mean
+        # Forecast en test con pmdarima
+        forecast = model.predict(n_periods=test_size, X=exog_test)
         
         # Calcular MAPE
-        mape = np.mean(np.abs((data_test.values - forecast.values) / data_test.values)) * 100
+        mape = np.mean(np.abs((data_test.values - forecast) / data_test.values)) * 100
         
         return {
             'model': model,
-            'forecast': pd.Series(forecast.values),
+            'forecast': pd.Series(forecast),
             'mape': mape,
             'parameters': (
                 model.order[0], model.order[1], model.order[2],
@@ -291,13 +286,9 @@ class ARIMAXModels:
             summary_text = str(model.summary())
             
             return {
-                'aic': model.aic,
-                'bic': model.bic,
-                'rmse': np.sqrt(model.mse),
-                'loglik': model.llf,
-                'summary': summary_text,
-                'parameters': model.params,
-                'pvalues': model.pvalues
+                'aic': model.aic(),
+                'bic': model.bic(),
+                'summary': summary_text
             }
         except Exception as e:
             return {'error': str(e)}
@@ -333,7 +324,6 @@ class ARIMAXModels:
         data_train = data.iloc[:split_point]
         data_test = data.iloc[split_point:]
         exog_train = exog.iloc[:split_point]
-        exog_test = exog.iloc[split_point:]
         
         # ARIMAX
         arimax_forecast, arimax_model = ARIMAXModels.fit_arimax_auto(
@@ -344,8 +334,7 @@ class ARIMAXModels:
         )) * 100
         
         # ARIMA (sin exógenas)
-        from pmdarima import auto_arima as auto_arima_univariate
-        arima_model = auto_arima_univariate(
+        arima_model = auto_arima(
             data_train,
             seasonal=True,
             m=12,
@@ -353,9 +342,9 @@ class ARIMAXModels:
             trace=False,
             suppress_warnings=True
         )
-        arima_forecast = arima_model.predict(steps=len(data_test))
+        arima_forecast = arima_model.predict(n_periods=len(data_test))
         arima_mape = np.mean(np.abs(
-            (data_test.values - arima_forecast.values) / data_test.values
+            (data_test.values - arima_forecast) / data_test.values
         )) * 100
         
         improvement = ((arima_mape - arimax_mape) / arima_mape) * 100
