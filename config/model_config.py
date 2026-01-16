@@ -160,5 +160,6 @@ PROJECT_INFO = {
 
 TRAIN_TEST_SPLIT = {
     'train_ratio': 0.8,  # 80% datos para entrenamiento
+    'test_years_legacy': 7,  # Alternative: fixed 7-year test (2019-2025)
     'test_ratio': 0.2,  # 20% datos para validacion (backtesting)
 }

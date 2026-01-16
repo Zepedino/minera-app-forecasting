@@ -6,7 +6,7 @@ Carga CSVs de Investing.com y valida contra Yahoo Finance.
 
 import pandas as pd
 import yfinance as yf
-from config import DATA_FILES, YFINANCE_TICKERS
+from config import DATA_FILES, YFINANCE_TICKERS, DATA_DIR
 from .logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -134,26 +134,50 @@ def validate_with_yfinance(metal: str, investing_data: pd.Series) -> dict:
         return {'validated': False, 'reason': str(e)}
 
 
-def load_and_validate(metal: str) -> pd.Series:
-    """
-    Carga datos y ejecuta validacion automatica.
+def load_and_validate(metal_name: str) -> pd.Series:
+    logger.info(f"=== Cargando datos de {metal_name.upper()} ===")
     
-    Args:
-        metal: Nombre del metal
+    if metal_name not in DATA_FILES:
+        raise ValueError(f"Metal '{metal_name}' no configurado. Opciones: {list(DATA_FILES.keys())}")
     
-    Returns:
-        Serie temporal completa (1990-2025)
-    """
-    logger.info(f"=== Cargando datos de {metal.upper()} ===")
+    filepath = DATA_FILES[metal_name]
     
-    # Cargar datos completos (1990-2025)
-    data = load_investing_data(metal)
+    if not filepath.exists():
+        raise FileNotFoundError(f"Archivo no encontrado: {filepath}")
     
-    # Validar solo periodo 2000-2025 con Yahoo Finance
-    validation = validate_with_yfinance(metal, data)
+    df = pd.read_csv(filepath, encoding='utf-8-sig')
     
-    if validation['validated'] and validation['correlation'] < 0.90:
-        logger.warning(f"Correlacion baja ({validation['correlation']:.4f}) - revisar datos")
+    df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%Y')
     
-    # Devolver datos completos (no solo validados)
-    return data
+    if df['Price'].dtype == 'object':
+        df['Price'] = df['Price'].str.replace(',', '')
+    
+    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
+    
+    df = df.dropna(subset=['Price'])
+    
+    df = df.set_index('Date').sort_index()
+    
+    df = df[~df.index.duplicated(keep='last')]
+    
+    series = df['Price']
+    
+    series = series[series.index <= '2025-12-31']
+    
+    series = series.asfreq('MS')
+    
+    if series.isna().any():
+        nan_count = series.isna().sum()
+        logger.warning(f"{nan_count} NaN detectados, rellenando...")
+        series = series.ffill()
+        if series.isna().any():
+            series = series.bfill()
+    
+    logger.info(f"Cargado {metal_name}: {len(series)} observaciones ({series.index.min().date()} a {series.index.max().date()})")
+    
+    if metal_name in YFINANCE_TICKERS:
+        validate_with_yfinance(metal_name, series)
+    else:
+        logger.warning(f"{metal_name} no tiene ticker en Yahoo Finance")
+    
+    return series
