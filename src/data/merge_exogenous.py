@@ -77,9 +77,7 @@ def merge_metal_with_exogenous(metal_name, start_date='1990-01-01', end_date='20
             logger.warning(f"  Saltando {var_name} (no encontrada)")
             continue
         
-        # Merge por fecha (outer join para ver gaps)
         df_combined = df_combined.join(df_var, how='left')
-        
         logger.info(f"  Agregado {var_name}")
     
     # 3. Filtrar rango de fechas
@@ -94,7 +92,8 @@ def merge_metal_with_exogenous(metal_name, start_date='1990-01-01', end_date='20
     
     # 5. Interpolación lineal para NaN (solo en exógenas)
     exog_cols = [col for col in df_combined.columns if col != 'Price']
-    df_combined[exog_cols] = df_combined[exog_cols].interpolate(method='linear')
+    if len(exog_cols) > 0:
+        df_combined[exog_cols] = df_combined[exog_cols].interpolate(method='linear')
     
     # 6. Eliminar filas con NaN en Price
     df_combined = df_combined.dropna(subset=['Price'])

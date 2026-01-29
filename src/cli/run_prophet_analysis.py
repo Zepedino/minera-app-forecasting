@@ -172,9 +172,9 @@ def main():
             test_ratio=args.test_ratio,
             output_dir=args.output_dir,
         )
-        logger.info("\n✓ Analisis Prophet completado exitosamente")
+        logger.info("\nAnalisis Prophet completado exitosamente")
     except Exception as e:
-        logger.error(f"\n✗ Error en analisis Prophet: {e}", exc_info=True)
+        logger.error(f"\nError en analisis Prophet: {e}", exc_info=True)
         raise
 
 
